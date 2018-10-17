@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  RayBreak
 //
-//  Created by dely on 2018. 10. 4..
+//  Created by dely on 2018. 10. 6..
 //  Copyright © 2018년 dely. All rights reserved.
 //
 

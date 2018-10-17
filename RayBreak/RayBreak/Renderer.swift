@@ -2,18 +2,18 @@
 //  Renderer.swift
 //  RayBreak
 //
-//  Created by dely on 2018. 10. 4..
+//  Created by dely on 2018. 10. 11..
 //  Copyright © 2018년 dely. All rights reserved.
 //
 
 import MetalKit
 
 class Renderer: NSObject {
-    let device: MTLDevice
-    let commandQueue: MTLCommandQueue
+    var device: MTLDevice
+    var commandQueue: MTLCommandQueue
     
     var vertices: [Float] = [
-        0, -1, 0,
+        0, 1, 0,
         -1, -1, 0,
         1, -1, 0
     ]
@@ -21,7 +21,7 @@ class Renderer: NSObject {
     var pipelineState: MTLRenderPipelineState?
     var vertexBuffer: MTLBuffer?
     
-    init(device: MTLDevice) {
+    required init?(device: MTLDevice) {
         self.device = device
         commandQueue = device.makeCommandQueue()!
         super.init()
@@ -33,18 +33,19 @@ class Renderer: NSObject {
         vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout<Float>.size, options: [])
     }
     
-    private func buildPipelineState() {
+    private func buildPipelineState(){
+//        let library = device.newDefaultLibrary()
         let library = device.makeDefaultLibrary()
         let vertexFunction = library?.makeFunction(name: "vertex_shader")
         let fragmentFunction = library?.makeFunction(name: "fragment_shader")
         
-        let pipelineDescriptor = MTLRenderPipelineDescriptor()
-        pipelineDescriptor.vertexFunction = vertexFunction
-        pipelineDescriptor.fragmentFunction = fragmentFunction
-        pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+        let pipelineDesciptor = MTLRenderPipelineDescriptor()
+        pipelineDesciptor.vertexFunction = vertexFunction
+        pipelineDesciptor.fragmentFunction = fragmentFunction
+        pipelineDesciptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         
         do {
-            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDesciptor)
         } catch let error as NSError {
             print("error: \(error.localizedDescription)")
         }
@@ -52,13 +53,14 @@ class Renderer: NSObject {
 }
 
 extension Renderer: MTKViewDelegate {
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-    }
     func draw(in view: MTKView) {
-        guard let drawable = view.currentDrawable, let pipelineState = pipelineState, let descriptor = view.currentRenderPassDescriptor else {
+        guard let drawable = view.currentDrawable,
+            let pipelineState = pipelineState,
+            let descriptor = view.currentRenderPassDescriptor else {
             return
         }
         let commandBuffer = commandQueue.makeCommandBuffer()
+        
         let commandEncoder = commandBuffer?.makeRenderCommandEncoder(descriptor: descriptor)
         
         commandEncoder?.setRenderPipelineState(pipelineState)
@@ -69,4 +71,7 @@ extension Renderer: MTKViewDelegate {
         commandBuffer?.commit()
     }
     
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    }
 }
+
